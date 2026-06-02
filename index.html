@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awsmosis - MindShift Wellness Simulation</title>
+    <style>
+        :root {
+            --primary: #4A154B; /* Inspired by corporate wellness & luxury branding */
+            --secondary: #6B2D5C;
+            --accent-green: #8ED081;
+            --accent-blue: #3AAFA9;
+            --accent-red: #E07A5F;
+            --bg-light: #F4F6F9;
+            --text-dark: #2D3748;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .sim-container {
+            background: white;
+            width: 100%;
+            max-width: 850px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header / Logo Area */
+        .sim-header {
+            background: #ffffff;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #E2E8F0;
+        }
+
+        .logo-container img {
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .sim-title-tag {
+            text-align: right;
+        }
+
+        .sim-title-tag h2 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .sim-title-tag p {
+            font-size: 0.8rem;
+            color: #718096;
+            font-style: italic;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #EDF2F7;
+            height: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent-blue));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Main Screen Layout */
+        .sim-body {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            min-height: 450px;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Simulation Visuals */
+        .visual-panel {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            background: #E2E8F0;
+        }
+
+        .visual-panel img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Question & Choices */
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .choices-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .btn-choice {
+            background: #FFF;
+            border: 2px solid #E2E8F0;
+            padding: 16px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-choice:hover {
+            border-color: var(--primary);
+            background-color: #FDF2FA;
+            transform: translateX(5px);
+        }
+
+        .choice-badge {
+            background: #EDF2F7;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Start Screen Specifics */
+        .start-screen {
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .start-screen h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(74, 21, 75, 0.3);
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        /* Dashboard / Results Page */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 650px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        .dash-card {
+            background: #F8FAFC;
+            border-radius: 12px;
+            padding: 20px;
+            border-top: 4px solid var(--primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .score-circle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .score-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 10px 0;
+        }
+
+        .suggestions-list {
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .suggestions-list li {
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.4;
+        }
+
+        .suggestions-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        /* Footer / Creator Disclaimer */
+        .sim-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #718096;
+            line-height: 1.5;
+            width: 100%;
+            max-width: 850px;
+            padding: 0 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sim-container">
+    <header class="sim-header">
+        <div class="logo-container">
+            <img src="https://i.ibb.co/3ynvWpX/image-079888.png" alt="AWSMOSIS Logo">
+        </div>
+        <div class="sim-title-tag">
+            <h2>MindShift Sim</h2>
+            <p>Transition Redefined...</p>
+        </div>
+    </header>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="sim-body">
+        
+        <div class="screen active" id="startScreen">
+            <div class="visual-panel">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80" alt="Corporate Team Wellness">
+            </div>
+            <div class="start-screen">
+                <h1>Corporate Wellness Simulation</h1>
+                <p style="color: #4A5568; max-width: 600px; line-height: 1.6; margin-bottom: 5px;">Welcome to your interactive personal energy audit. Navigate through 10 real-world micro-scenarios to uncover your current baseline and unlock tailored tactics to optimize work-life harmony.</p>
+                <p style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">Created by Awsmosis</p>
+                <button class="btn-primary" onclick="startSimulation()">Begin Simulation</button>
+            </div>
+        </div>
+
+        <div class="screen" id="questionScreen">
+            <div class="visual-panel">
+                <img id="questionImage" src="" alt="Scenario Graphic">
+            </div>
+            <div class="question-text" id="questionText">Loading Scenario...</div>
+            <div class="choices-grid" id="choicesGrid">
+                </div>
+        </div>
+
+        <div class="screen" id="dashboardScreen">
+            <h2 style="color: var(--primary); font-size: 1.8rem; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px;">Your Energy & Balance Dashboard</h2>
+            
+            <div class="dashboard-grid">
+                <div class="score-circle-container">
+                    <h3>Your Resilience Index</h3>
+                    <div class="score-number" id="dashboardScore">0/40</div>
+                    <p id="scoreTier">Calculating Profile...</p>
+                </div>
+
+                <div class="dash-card">
+                    <h4 style="margin-bottom: 10px; color: var(--primary);">Primary Observation</h4>
+                    <p id="profileInsight" style="line-height: 1.5; color: #4A5568;"></p>
+                </div>
+            </div>
+
+            <div class="dash-card" style="border-top-color: var(--accent-blue); margin-top: 10px;">
+                <h4 style="margin-bottom:15px; color: var(--primary); font-size: 1.2rem;">Custom Growth Blueprint</h4>
+                <ul class="suggestions-list" id="suggestionsContainer">
+                    </ul>
+            </div>
+
+            <button class="btn-primary" style="align-self: center;" onclick="restartSimulation()">Restart Assessment</button>
+        </div>
+
+    </div>
+</div>
+
+<footer class="sim-footer">
+    <strong>Created & Designed by Awsmosis</strong><br>
+    Disclaimer: © 2026 Awsmosis. All rights reserved. This mental wellness simulation tool, including its logic, scenarios, results scoring framework, and interface structure, is the intellectual property of Awsmosis. It is intended strictly for corporate training, personal development, and educational evaluation. Unauthorized reproduction, resharing without attribution, or commercial exploitation is prohibited.
+</footer>
+
+<script>
+    // Comprehensive simulation matrix containing real-life corporate scenarios
+    const simulationMatrix = [
+        {
+            text: "Scenario 1: You open your laptop at 9:00 AM and notice an unexpected high-priority task assigned to you with a tight deadline. Your immediate reaction is:",
+            image: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Dive straight into it immediately, delaying all your other planned tasks without restructuring.", weight: 2 },
+                { text: "Take a deep 2-minute breath, re-prioritize your day's schedule, and communicate realistic timelines.", weight: 4 },
+                { text: "Feel a wave of panic, delay opening the document, and complain to a colleague about poor planning.", weight: 1 },
+                { text: "Delegate it straight away to someone else without fully evaluating your own capabilities.", weight: 3 }
+            ]
+        },
+        {
+            text: "Scenario 2: It is mid-afternoon and your focus levels drop completely. Brain fog sets in. How do you respond?",
+            image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Grab another high-caffeine energy beverage or heavy snack to artificially force your way through.", weight: 1 },
+                { text: "Push through and stare at the monitor stubbornly, accepting low output and high errors.", weight: 2 },
+                { text: "Step completely away from your desk for a 10-minute stretch, light walk, or deep breathing gap.", weight: 4 },
+                { text: "Switch over to mindlessly scrolling social media channels or personal chats at your desk.", weight: 3 }
+            ]
+        },
+        {
+            text: "Scenario 3: A team member addresses a disagreement with you aggressively or defensively during an open project review meeting.",
+            image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Respond instantly with matching defensive tones to establish authority in front of everyone.", weight: 1 },
+                { text: "Listen calmly, acknowledge their standpoint, and propose an objective offline sidebar discussion.", weight: 4 },
+                { text: "Stay completely silent, shut down mentally, and harbor resentment for the rest of the work week.", weight: 2 },
+                { text: "Agree with them superficially just to avoid discomfort, keeping your true insights hidden.", weight: 3 }
+            ]
+        },
+        {
+            text: "Scenario 4: Your workspace—either your physical desk at home or office, or your desktop files—looks like:",
+            image: "https://images.unsplash.com/photo-1499955085172-a104c9463ece?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Meticulously organized, clean, clear of clutter, and optimized to allow easy deep focus.", weight: 4 },
+                { text: "Moderately organized, though loose documents and open files frequently distract you.", weight: 3 },
+                { text: "Extremely unorganized, chaotic piles everywhere, constantly losing time searching for things.", weight: 1 },
+                { text: "Clean on the outside, but your digital environment is completely overwhelmed with unsorted files.", weight: 2 }
+            ]
+        },
+        {
+            text: "Scenario 5: An urgent client or internal stakeholder query pings your device late in the evening well after your log-off hours.",
+            image: "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Drop your dinner/family time instantly to reply, remaining on high alert the rest of the evening.", weight: 1 },
+                { text: "Read the alert immediately, worry about it all night long, but wait until morning to reply.", weight: 2 },
+                { text: "Assess urgency: If not an absolute operational disaster, reply systematically tomorrow morning.", weight: 4 },
+                { text: "Ignore it completely, but feel deeply guilty and uncomfortable about your boundaries.", weight: 3 }
+            ]
+        },
+        {
+            text: "Scenario 6: How consistently do you implement physical movement or targeted recovery protocols into your operational week?",
+            image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Highly dedicated: Consistent intentional physical exercise, sports, or brisk walking routines daily.", weight: 4 },
+                { text: "Occasional: Spasmodic bursts of weekend activity, but mostly sedentary throughout the workspace week.", weight: 2 },
+                { text: "Barely any physical motion; physical movement is treated as an afterthought or rare event.", weight: 1 },
+                { text: "Primarily active at home but have zero movement habits during actual office hours.", weight: 3 }
+            ]
+        },
+        {
+            text: "Scenario 7: When evaluating your general quality of nighttime sleep and morning readiness over the past few weeks:",
+            image: "https://images.unsplash.com/photo-1511295742364-927d44d60b35?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Disrupted sleep patterns; regularly engaging with screens right up until closing your eyes.", weight: 1 },
+                { text: "Solid, deep recovery; deliberate evening wind-down rituals without excessive device glare.", weight: 4 },
+                { text: "Inconsistent duration; sleeping enough hours but waking up feeling unrefreshed and sluggish.", weight: 2 },
+                { text: "Sufficient sleep, but mind races immediately upon opening your eyes to check notifications.", weight: 3 }
+            ]
+        },
+        {
+            text: "Scenario 8: When complex professional dilemmas require solutions, how comfortable are you reaching out for support or feedback?",
+            image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Extremely isolated; you view seeking assistance as a sign of underperformance or vulnerability.", weight: 1 },
+                { text: "Proactive and open; leveraging peers, clear mental health resources, or frameworks effectively.", weight: 4 },
+                { text: "You attempt everything individually first, only calling for help when an issue escalates dangerously.", weight: 2 },
+                { text: "You chat casually to peers to vent frustrations, but rarely seek practical, structured solutions.", weight: 3 }
+            ]
+        },
+        {
+            text: "Scenario 9: During long operational strategy meetings or prolonged screen-heavy production blocks, your posture resembles:",
+            image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Slouched over, spine bent forward, holding high physical tension in your jaw, shoulders, and neck.", weight: 1 },
+                { text: "Consciously ergonomic; taking breaks to correct form, stretch, and check physical alignment.", weight: 4 },
+                { text: "Varying wildly; starting straight but turning completely slouch-heavy within 15 minutes.", weight: 2 },
+                { text: "Relying heavily on external ergonomic chairs while completely ignoring your internal core posture.", weight: 3 }
+            ]
+        },
+        {
+            text: "Scenario 10: Reflecting honestly on your career journey right now, how often do you experience genuine personal fulfillment or gratitude?",
+            image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Rarely; focused almost entirely on what's going wrong, missing deadlines, or future stressors.", weight: 1 },
+                { text: "Consistently; anchoring yourself by celebrating incremental micro-wins and team breakthroughs.", weight: 4 },
+                { text: "Only when major quarterly milestones are hit; otherwise everyday feels like a mechanical grind.", weight: 2 },
+                { text: "You enjoy the work tasks but feel disconnected from the larger purpose or true self-growth.", weight: 3 }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userCumulativeScore = 0;
+
+    function startSimulation() {
+        document.getElementById('startScreen').classList.remove('active');
+        document.getElementById('questionScreen').classList.add('active');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const currentData = simulationMatrix[currentQuestionIndex];
+        
+        // Update visual context elements
+        document.getElementById('questionImage').src = currentData.image;
+        document.getElementById('questionText').innerText = currentData.text;
+        
+        // Generate choices via structural grid loop
+        const choicesGrid = document.getElementById('choicesGrid');
+        choicesGrid.innerHTML = '';
+        
+        currentData.choices.forEach((choice, index) => {
+            const labelBadge = String.fromCharCode(65 + index); // Gives A, B, C, D
+            const button = document.createElement('button');
+            button.className = 'btn-choice';
+            button.innerHTML = `<span class="choice-badge">${labelBadge}</span> <span>${choice.text}</span>`;
+            button.onclick = () => selectChoice(choice.weight);
+            choicesGrid.appendChild(button);
+        });
+
+        // Update real-time progress bar tracking
+        const progressionPercentage = ((currentQuestionIndex) / simulationMatrix.length) * 100;
+        document.getElementById('progressBar').style.width = `${progressionPercentage}%`;
+    }
+
+    function selectChoice(chosenWeight) {
+        userCumulativeScore += chosenWeight;
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < simulationMatrix.length) {
+            loadQuestion();
+        } else {
+            showDashboardReport();
+        }
+    }
+
+    function showDashboardReport() {
+        document.getElementById('questionScreen').classList.remove('active');
+        document.getElementById('dashboardScreen').classList.add('active');
+        document.getElementById('progressBar').style.width = `100%`;
+
+        // Update score indicators
+        const maxPossibleScore = simulationMatrix.length * 4;
+        document.getElementById('dashboardScore').innerText = `${userCumulativeScore} / ${maxPossibleScore}`;
+
+        // Initialize Dynamic Text Content Variables
+        let tierLabel = "";
+        let coreInsight = "";
+        let tacticalBlueprints = [];
+
+        // Evaluative Branching Rules Based on Cumulative Weight Points
+        if (userCumulativeScore >= 32) {
+            tierLabel = "Optimal Resilience Champion";
+            coreInsight = "Exceptional emotional self-regulation, boundary clarity, and proactive lifestyle rituals. You handle corporate stressors with a grounded mindset, driving high productivity without burning out.";
+            tacticalBlueprints = [
+                "**Champion Mentorship:** Leverage your state of stability to mentor colleagues struggling with stress management.",
+                "**Micro-Optimizations:** Perfect your flow state by exploring deep work blocks and advanced physical mobility pacing.",
+                "**Preventative Preservation:** Protect your current boundaries fiercely; treat rest as an essential non-negotiable metric."
+            ];
+        } else if (userCumulativeScore >= 22) {
+            tierLabel = "Functional but Exposed Profile";
+            coreInsight = "You possess fundamental wellness coping mechanisms, but high organizational volume pushes you into reactive processing patterns, impacting consistency and long-term energy reserves.";
+            tacticalBlueprints = [
+                "**Enforce Clean Buffers:** Implement rigid operational cut-off times. Transition away from work devices at least 60 minutes before sleeping.",
+                "**Strategic Intermittent Breaks:** Do not wait for complete cognitive fatigue. Deploy deliberate 5-minute movement sessions every 90 minutes.",
+                "**Refraction Exercises:** Practice active re-centering protocols (like box breathing) before entering demanding group project calls."
+            ];
+        } else {
+            tierLabel = "High-Stress Burnout Threshold";
+            coreInsight = "Your feedback paths indicate a highly reactive, vulnerable state characterized by cognitive fatigue, blurred work-life separation, and physical stagnation. Immediate protective corrections are highly recommended.";
+            tacticalBlueprints = [
+                "**Radical Boundary Adjustments:** Communicate clear, transparent availability expectations with your manager to avoid late-night escalation anxieties.",
+                "**Declutter Visual & Digital Workspaces:** Simplify your physical desk and desktop folders immediately to limit overwhelming ambient stimuli.",
+                "**Micro-Doses of Movement:** Commit to just 15 minutes of dedicated daily walking or basic bodyweight recovery stretches to reset high biological stress levels."
+            ];
+        }
+
+        // Render calculated metrics into Dashboard interface
+        document.getElementById('scoreTier').innerText = tierLabel;
+        document.getElementById('profileInsight').innerText = coreInsight;
+
+        const suggestionsContainer = document.getElementById('suggestionsContainer');
+        suggestionsContainer.innerHTML = '';
+        
+        tacticalBlueprints.forEach(actionItem => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = actionItem.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            suggestionsContainer.appendChild(listItem);
+        });
+    }
+
+    function restartSimulation() {
+        currentQuestionIndex = 0;
+        userCumulativeScore = 0;
+        document.getElementById('dashboardScreen').classList.remove('active');
+        document.getElementById('startScreen').classList.add('active');
+        document.getElementById('progressBar').style.width = `0%`;
+    }
+</script>
+
+</body>
+</html>
